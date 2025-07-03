@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thumbslider with Gift 🎁</title>
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  background: #f5f5f5;
+}
+
+.slider-container {
+  position: relative;
+  width: 600px;
+  height: 400px;
+  overflow: hidden;
+}
+
+.slider {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  height: 100%;
+}
+
+.slider img {
+  width: 100%;
+  height: 100%;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 30px;
+  color: #333;
+  background: rgba(255,255,255,0.7);
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  user-select: none;
+}
+
+.arrow:hover {
+  background: rgba(255,255,255,1);
+}
+
+.prev { left: 10px; }
+.next { right: 10px; }
+
+.thumbnails {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  max-width: 620px;
+}
+
+.thumbnails img {
+  width: 60px;
+  height: 40px;
+  margin: 2px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+
+.thumbnails img.active {
+  opacity: 1;
+  border: 2px solid #333;
+}
+
+.slider-range {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* Balloons animation */
+.balloons {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.balloon {
+  position: absolute;
+  bottom: -100px;
+  width: 40px;
+  height: 60px;
+  background: red;
+  border-radius: 20px 20px 10px 10px;
+  animation: floatUp 4s ease-out forwards;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-500px); opacity: 0; }
+}
+
+/* Achievement popup */
+#achievementPopup {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,0.8);
+  color: #333;
+  padding: 20px 40px;
+  border-radius: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  display: none;
+  z-index: 10;
+}
+
+/* 🎁 Gift box fixed bottom left */
+#giftBox {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  display: none; /* hidden initially */
+  cursor: pointer;
+  text-align: center;
+  z-index: 20;
+}
+
+#giftBox img {
+  width: 80px;
+  height: 80px;
+}
+
+#giftBox span {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-top: 4px;
+  font-weight: bold;
+}
+
+
+/* 🎥 Video modal popup */
+#videoModal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: none; /* show on click */
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+}
+
+
+#videoModalContent {
+  width: 400px;   /* or whatever fits nicely */
+  height: 300px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#videoModalContent video {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 10px;
+  display: block;
+}
+
+
+.closeBtn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+  z-index: 9999;
+}
+
+
+
+</style>
+</head>
+<body>
+
+<div class="slider-container">
+  <div class="slider" id="slider">
+    <script>
+      for(let i=1; i<=33; i++) {
+        document.write(`<img src="img/${i}.jpg" alt="Image ${i}">`);
+      }
+    </script>
+  </div>
+  <button class="arrow prev" onclick="prevSlide()">❮</button>
+  <button class="arrow next" onclick="nextSlide()">❯</button>
+  <div class="balloons" id="balloons"></div>
+  <div id="achievementPopup">🎉 Achievement Unlocked!</div>
+</div>
+
+<div class="thumbnails" id="thumbnails">
+  <script>
+    for(let i=1; i<=33; i++) {
+      document.write(`<img src="img/thumb${i}.jpg" onclick="currentSlide(${i-1})">`);
+    }
+  </script>
+</div>
+
+<input type="range" min="0" max="32" value="0" class="slider-range" id="imageRange">
+
+<!-- 🎁 Gift box -->
+<div id="giftBox" onclick="openVideoModal()">
+  <img src="img/giftbox.png" alt="Gift">
+  <span>You won a gift!</span>
+</div>
+
+<!-- 🎥 Video Modal -->
+<div id="videoModal">
+  <div id="videoModalContent">
+    <span class="closeBtn" onclick="closeVideoModal()">&times;</span>
+    <video controls>
+      <source src="img/gift.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+</div>
+
+<script>
+let currentIndex = 0;
+const slider = document.getElementById('slider');
+const rangeInput = document.getElementById('imageRange');
+const thumbnails = document.querySelectorAll('.thumbnails img');
+const totalSlides = 33;
+const balloonsContainer = document.getElementById('balloons');
+const achievementPopup = document.getElementById('achievementPopup');
+const giftBox = document.getElementById('giftBox');
+
+function showSlide(index) {
+  if (index >= totalSlides) {
+    currentIndex = 0;
+  } else if (index < 0) {
+    currentIndex = totalSlides - 1;
+  } else {
+    currentIndex = index;
+  }
+  slider.style.transform = `translateX(-${currentIndex * 600}px)`;
+  updateThumbnails();
+  rangeInput.value = currentIndex;
+
+  if (currentIndex === 32) {
+    launchCelebration();
+  }
+}
+
+function nextSlide() { showSlide(currentIndex + 1); }
+function prevSlide() { showSlide(currentIndex - 1); }
+function currentSlide(index) { showSlide(index); }
+
+function updateThumbnails() {
+  thumbnails.forEach((thumb, idx) => {
+    thumb.classList.toggle('active', idx === currentIndex);
+  });
+}
+
+let autoSlide = setInterval(nextSlide, 5000);
+function resetAutoSlide() {
+  clearInterval(autoSlide);
+  autoSlide = setInterval(nextSlide, 5000);
+}
+rangeInput.addEventListener('input', e => {
+  showSlide(parseInt(e.target.value));
+  resetAutoSlide();
+});
+
+// 🎉 Celebration + show gift
+function launchCelebration() {
+  achievementPopup.style.display = 'block';
+  giftBox.style.display = 'block'; // show gift box
+
+  balloonsContainer.innerHTML = '';
+  for(let i=0; i<15; i++) {
+    const balloon = document.createElement('div');
+    balloon.className = 'balloon';
+    balloon.style.left = `${Math.random()*90}%`;
+    balloon.style.background = getRandomColor();
+    balloon.style.animationDelay = `${Math.random()*2}s`;
+    balloonsContainer.appendChild(balloon);
+  }
+
+  setTimeout(() => {
+    achievementPopup.style.display = 'none';
+    balloonsContainer.innerHTML = '';
+  }, 5000);
+}
+
+function getRandomColor() {
+  const colors = ['#ff4d4d', '#ff9933', '#ffff66', '#66ff66', '#66ccff', '#cc66ff', '#ff66b3'];
+  return colors[Math.floor(Math.random()*colors.length)];
+}
+
+// 🎥 Video modal functions
+function openVideoModal() {
+  document.getElementById('videoModal').style.display = 'flex';
+}
+function closeVideoModal() {
+  document.getElementById('videoModal').style.display = 'none';
+}
+
+// Init
+showSlide(currentIndex);
+</script>
+</body>
+</html>
